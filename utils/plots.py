@@ -68,18 +68,21 @@ def butter_lowpass_filtfilt(data, cutoff=1500, fs=50000, order=5):
     return filtfilt(b, a, data)  # forward-backward filter
 
 
-def plot_one_box(x, im, color=(128, 128, 128), label=None, line_thickness=3):
+def plot_one_box(x, im,bl_im, color=(128, 128, 128), label=None, line_thickness=3):
     # Plots one bounding box on image 'im' using OpenCV
     assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to plot_on_box() input image.'
-    tl = line_thickness or round(0.002 * (im.shape[0] + im.shape[1]) / 2) + 1  # line/font thickness
+    tl = 1
     c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
-    cv2.rectangle(im, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
+    
+    color = (0, 0, 255)
+    cv2.rectangle(bl_im, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
+    fontScaleCustom = 1/4
     if label:
-        tf = max(tl - 1, 1)  # font thickness
-        t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
-        c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
-        cv2.rectangle(im, c1, c2, color, -1, cv2.LINE_AA)  # filled
-        cv2.putText(im, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+        tf = 1#max(tl - 1, 1)  # font thickness
+        t_size = cv2.getTextSize(label, 0, fontScale=fontScaleCustom, thickness=tf)[0]
+        c2 = c1[0] + t_size[0]+5, c1[1] - t_size[1] - 3
+        cv2.rectangle(bl_im, c1, c2, color, -1, cv2.LINE_AA)  # filled
+        cv2.putText(bl_im, label.upper(), (c1[0], c1[1] - 2), 0, fontScaleCustom, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
 
 
 def plot_one_box_PIL(box, im, color=(128, 128, 128), label=None, line_thickness=None):
@@ -88,10 +91,11 @@ def plot_one_box_PIL(box, im, color=(128, 128, 128), label=None, line_thickness=
     draw = ImageDraw.Draw(im)
     line_thickness = line_thickness or max(int(min(im.size) / 200), 2)
     draw.rectangle(box, width=line_thickness, outline=color)  # plot
+    color = (255, 0, 0)
     if label:
         font = ImageFont.truetype("Arial.ttf", size=max(round(max(im.size) / 40), 12))
         txt_width, txt_height = font.getsize(label)
-        draw.rectangle([box[0], box[1] - txt_height + 4, box[0] + txt_width, box[1]], fill=color)
+        draw.rectangle([box[0], box[1] - txt_height + 4, box[0] + txt_width+100, box[1]], fill=color)
         draw.text((box[0], box[1] - txt_height + 1), label, fill=(255, 255, 255), font=font)
     return np.asarray(im)
 
